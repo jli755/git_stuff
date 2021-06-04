@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import shutil
 import shlex
-
+import datetime
 
 """
 Get latest output for each model
