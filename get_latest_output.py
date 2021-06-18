@@ -12,7 +12,7 @@ Get latest output for each model
 """
 
 # name contains current date time
-outdir = datetime.datetime.now().strftime("OUTPUT_%Y%m%d_%H-%M-%S") 
+outdir = datetime.datetime.now().strftime("OUTPUT_%Y%m%d_%H-%M-%S")
 myoutdir = Path("..") / outdir
 myoutdir.mkdir(parents=True, exist_ok=True)
 
@@ -35,9 +35,20 @@ for br in branch_list:
     print(f'*** checking out branch "{br}"')
     subprocess.run(['git', 'switch', br])
     subprocess.run(['git', 'pull', '--ff-only', 'origin', br])
-    
+
+    # get the commit hash
+    commit_hash = subprocess.run(['git', 'rev-parse', 'HEAD'], capture_output=True).stdout.strip().decode("utf-8")
+
     # will not copy if output dir is not exist
     try:
         shutil.copytree('output', brdir, dirs_exist_ok=True)
     except FileNotFoundError:
     	pass
+
+    # copy all params yaml file
+    for f in Path('.').glob('params*.yaml'):
+        shutil.copyfile(f, brdir / f)
+
+    # write out commit number
+    with open(brdir / 'commit_hash.txt', 'w') as text_file:
+        print(f"Commit: {commit_hash}", file=text_file)
